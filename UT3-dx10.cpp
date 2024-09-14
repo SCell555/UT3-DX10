@@ -8,13 +8,22 @@ constexpr DWORD offsetNumeratorSet = 0xE7CF6D;
 constexpr BYTE badDenominator[]{ 0xB8, 0x01, 0x00, 0x00, 0x00, 0x89, 0x44, 0x24, 0x6C };
 constexpr BYTE badNumerator[] { 0xC7, 0x44, 0x24, 0x6C, 0x3C, 0x00, 0x00, 0x00 };
 
+#ifdef _UNICODE
+int WINAPI wWinMain( _In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nShowCmd )
+#else
 int WINAPI WinMain( _In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd )
+#endif
 {
-	const TCHAR extraArgs[] = TEXT(" -d3d10 -msaa");
-	TCHAR path[MAX_PATH + ARRAYSIZE( extraArgs ) + 1];
-	GetCurrentDirectory( MAX_PATH, path );
-	StringCbCat( path, sizeof( path ), TEXT( "\\UT3.exe" ) );
-	StringCbCat( path, sizeof( path ), extraArgs );
+	TCHAR path[4096];
+	GetModuleFileName( nullptr, path, MAX_PATH );
+	wcsrchr( path, L'\\' )[1] = 0;
+	StringCbCat( path, sizeof( path ), TEXT( "UT3_steam.exe" ) );
+	StringCbCat( path, sizeof( path ), TEXT(" -d3d10 -msaa") );
+	if ( *lpCmdLine )
+	{
+		StringCbCat( path, sizeof( path ), TEXT( " " ) );
+		StringCbCat( path, sizeof( path ), lpCmdLine );
+	}
 
 	STARTUPINFOW si{};
 	si.cb = sizeof( si );
